@@ -6,7 +6,7 @@ var jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const connectionURL = 'mongodb://localhost:27017/TestBlog';
 
-mongoose.connect(connectionURL, { useNewUrlParser: true })
+mongoose.connect(connectionURL, { useNewUrlParser: true, useUnifiedTopology: true })
 
 //Register
 router.post('/register', async (req, res) => {
