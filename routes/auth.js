@@ -4,13 +4,32 @@ const User = require('../models/User')
 const mongoose = require('mongoose');
 var jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+
+var fs = require('fs');
+var path = require('path');
+var multer = require('multer');
+
 const connectionURL = 'mongodb://localhost:27017/TestBlog';
 
 mongoose.connect(connectionURL, { useNewUrlParser: true, useUnifiedTopology: true })
 
+const storage =multer.diskStorage({
+    destination:function(req,file,cb){
+cb(null,'./uploads')
+    },
+    filename:function(req,file,cb){
+cb(null,new Date().toISOString()+ file.originalname)
+    }
+})
+
+const upload = multer({storage:storage})
+
+
 //Register
-router.post('/register', async (req, res) => {
+router.post('/register',upload.single('image') , async (req, res,next) => {
+console.log("entered",req.file)
     try {
+        console.log("image req",req.file)
         const user = await User.find({ email: req.body.email })
         if (user.length >= 1) {
             return res.status(409).json({
@@ -19,13 +38,26 @@ router.post('/register', async (req, res) => {
         } else {
             bcrypt.hash(req.body.password, 10, async (err, hash) => {
                 if (err) {
-                    return req.status(500).json({
+                    return res.status(500).json({
                         error: err
                     })
                 }
                 else {
                     req.body.password = hash
-                    let newUser = await User.create(req.body)
+                    var obj = {
+                        fullName: req.body.fullName,
+                        password: hash,
+                        email: req.body.email,
+                        zipCode: req.body.zipCode,
+                        phoneNumber: req.body.phoneNumber,
+                        image: req.file.path
+                        // {
+
+                        //     data: fs.readFileSync(path.join(__dirname + '/uploads/' + req.file.filename)),
+                        //     contentType: 'image/png'
+                        // }
+                    }
+                    let newUser = await User.create(obj)
                     console.log("user created", newUser)
                     res.json(newUser)
                     res.end()
@@ -77,5 +109,8 @@ router.post('/login', async (req, res) => {
         console.log("error in inserting user", error)
     }
 })
+
+
+
 
 module.exports = router;

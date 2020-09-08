@@ -8,9 +8,9 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    image: {
-        type: String
-    },
+    // image: {
+    //     type: String
+    // },
     password: {
         type: String
     },
@@ -22,6 +22,13 @@ const UserSchema = new mongoose.Schema({
     },
     phoneNumber: {
         type: Number
+    },
+    image:
+    {
+        type: String,
+
+        // data: Buffer, 
+        // contentType: String 
     }
 })
 module.exports = mongoose.model('User', UserSchema)
